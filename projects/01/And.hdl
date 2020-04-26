@@ -14,5 +14,11 @@ CHIP And {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    /*   a & b = !!(a & b)
+     *         = !NAND(a,b)
+     *       t = NAND(a,b)
+     *   a & b = NAND(t,t)
+     */
+    Nand(a=a, b=b, out=temp);
+    Nand(a=temp, b=temp, out=out);
 }
