@@ -13,5 +13,31 @@ CHIP Xor {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    /*  a XOR b = (a & !b) | (!a & b)
+     *          = NAND( !(a & !b), !(!a & b) )
+     *          = NAND( NAND(a, !b), NAND(!a, b) )
+     *          = NAND( NAND(a, !b), NAND(!a, b) )
+     *                          ++        ++       <-- doesn't matter if
+     *                                                 other input is 0
+     *                   a b | f |         a b | f |    <-- refactor into f
+     *                   ----+---+--       ----+---+--
+     *                   0 - | - | 1       - 0 | - | 1
+     *                   0 - | - | 1       0 1 | 1 | 0
+     *                   1 0 | 1 | 0       - 0 | - | 1
+     *                   1 1 | 0 | 1       1 1 | 0 | 1
+     *
+     *                              a b | f  <-- NAND, XOR
+     *                              ----+--
+     *                              0 0 | -      XOR would be recursive,
+     *                              0 1 | 1      so substitute with NAND
+     *                              1 0 | 1
+     *                              1 1 | 0
+     *
+     *                          +++++++++        +++++++++
+     *          = NAND( NAND(a, NAND(a,b)), NAND(NAND(a,b), b) )
+     */
+     Nand(a=a, b=b, out=common);
+     Nand(a=a, b=common, out=n1);
+     Nand(a=b, b=common, out=n2);
+     Nand(a=n1, b=n2, out=out);
 }
