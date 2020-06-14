@@ -42,5 +42,27 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    /* Zero inputs if needed */
+    Mux16(a=x, b=false, sel=zx, out=x0);
+    Mux16(a=y, b=false, sel=zy, out=y0);
+    /* Negate inputs if needed */
+    Not16(in=x0, out=nx0);
+    Mux16(a=x0, b=nx0, sel=nx, out=transformedX);
+    Not16(in=y0, out=ny0);
+    Mux16(a=y0, b=ny0, sel=ny, out=transformedY);
+    /* Compute choose one of + and & */
+    Add16(a=transformedX, b=transformedY, out=plus);
+    And16(a=transformedX, b=transformedY, out=and);
+    Mux16(a=and, b=plus, sel=f, out=result);
+    /* Negate output */
+    Not16(in=result, out=nResult);
+    /* Select output or negated output */
+    /* Save the first and second bytes for later */
+    /* The negative flag is just the most significant bit */
+    Mux16(a=result, b=nResult, sel=no, out=out, out[0..7]=lsB, out[8..15]=msB, out[15]=ng);
+    /* The zero flag is a negated 16-way OR of the two output bytes */
+    Or8Way(in=lsB, out=nz0);
+    Or8Way(in=msB, out=nz1);
+    Or(a=nz0, b=nz1, out=nz);
+    Not(in=nz, out=zr);
 }
